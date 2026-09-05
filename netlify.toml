@@ -1,0 +1,22 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[dev]
+  command = "npm run vite"
+  targetPort = 5173
+  port = 8888
+  # Points away from dist/ so a previously built dist/_redirects can never
+  # shadow Vite's dev server. See scripts/write-redirects.mjs.
+  publish = "public"
+
+# The SPA fallback (/* -> /index.html 200) is written into dist/ by
+# scripts/write-redirects.mjs during the build. Declaring it here would also
+# rewrite Vite's dev-server module requests during `netlify dev`.
