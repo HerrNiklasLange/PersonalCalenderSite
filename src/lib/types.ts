@@ -81,9 +81,11 @@ export interface TimeBlocksDoc {
   log: Record<string, Record<string, BlockReview>>
   dayStart: number // first hour shown in the grid
   dayEnd: number // last hour shown in the grid
+  /** Monday-of-week ISO date -> this week's freeform priorities. */
+  focus: Record<string, string>
 }
 
-export const emptyTimeBlocks: TimeBlocksDoc = { template: [], log: {}, dayStart: 6, dayEnd: 22 }
+export const emptyTimeBlocks: TimeBlocksDoc = { template: [], log: {}, dayStart: 6, dayEnd: 22, focus: {} }
 
 /* ---------- Notes ---------- */
 

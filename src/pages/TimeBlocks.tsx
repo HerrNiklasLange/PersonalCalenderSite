@@ -133,7 +133,7 @@ export default function TimeBlocksPage() {
 
   return (
     <>
-      <TopBar title="Time blocks">
+      <TopBar title="This week">
         <SaveIndicator state={saveState} />
         <button
           className="btn"
@@ -180,6 +180,18 @@ export default function TimeBlocksPage() {
           <Empty>Loading…</Empty>
         ) : (
           <>
+            <div className="card focus-card">
+              <h2>This week's focus</h2>
+              <textarea
+                className="focus-input"
+                placeholder="What matters most this week?"
+                value={data.focus[weekStart] ?? ''}
+                onChange={(e) =>
+                  update((doc) => ({ ...doc, focus: { ...doc.focus, [weekStart]: e.target.value } }))
+                }
+              />
+            </div>
+
             <div className="card">
               <div className="spread" style={{ marginBottom: 8 }}>
                 <div>

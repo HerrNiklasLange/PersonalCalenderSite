@@ -520,6 +520,9 @@ label.field > span {
 
 /* ---------- time blocks ---------- */
 
+.focus-card { display: flex; flex-direction: column; gap: 8px; }
+.focus-input { min-height: 64px; }
+
 .week-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .week-grid {
   display: grid;

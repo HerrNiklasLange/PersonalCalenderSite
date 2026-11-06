@@ -61,7 +61,7 @@ export default function App() {
         <Route path="/blocks" element={<TimeBlocksPage />} />
         <Route path="/notes" element={<NotesPage />} />
         <Route path="/workflow" element={<WorkflowPage />} />
-        <Route path="*" element={<Navigate to="/calendar" replace />} />
+        <Route path="*" element={<Navigate to="/blocks" replace />} />
       </Routes>
     </Shell>
   )

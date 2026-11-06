@@ -2,9 +2,9 @@ import { NavLink } from 'react-router-dom'
 import type { ReactNode } from 'react'
 
 export const NAV_ITEMS = [
+  { to: '/blocks', label: 'This week', short: 'Week', glyph: '⏱️' },
   { to: '/calendar', label: 'Calendar', short: 'Calendar', glyph: '🗓️' },
   { to: '/habits', label: 'Habits', short: 'Habits', glyph: '🔥' },
-  { to: '/blocks', label: 'Time blocks', short: 'Blocks', glyph: '⏱️' },
   { to: '/notes', label: 'Notes', short: 'Notes', glyph: '📝' },
   { to: '/workflow', label: 'Workflow', short: 'Flow', glyph: '🗂️' },
 ]
