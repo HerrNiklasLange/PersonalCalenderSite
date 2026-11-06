@@ -464,6 +464,26 @@ label.field > span {
 .stat .value { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .stat .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--faint); }
 
+.habit-hero { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.streak-hero { display: flex; align-items: baseline; gap: 6px; }
+.streak-number { font-size: 2.1rem; font-weight: 750; line-height: 1; font-variant-numeric: tabular-nums; }
+.streak-label { font-size: 0.8rem; color: var(--faint); }
+
+.week-strip { display: flex; gap: 6px; }
+.week-strip-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.week-cell {
+  width: 100%;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: var(--surface-3);
+}
+.week-cell.today { box-shadow: 0 0 0 1.5px var(--text); }
+.week-cell-day { font-size: 0.66rem; font-weight: 650; color: var(--faint); text-transform: uppercase; }
+.history-toggle { align-self: flex-start; }
+
 .today-row {
   display: flex;
   align-items: center;

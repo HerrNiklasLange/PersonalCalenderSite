@@ -1,7 +1,17 @@
 import { useMemo, useState } from 'react'
 import { TopBar } from '../components/Shell'
 import { ColorPicker, Empty, Field, Modal, SaveIndicator } from '../components/ui'
-import { MONTH_NAMES, addDays, formatDay, fromISO, relativeLabel, startOfWeek, todayISO } from '../lib/date'
+import {
+  DAY_NAMES,
+  MONTH_NAMES,
+  addDays,
+  formatDay,
+  fromISO,
+  relativeLabel,
+  startOfWeek,
+  todayISO,
+  weekdayIndex,
+} from '../lib/date'
 import { useDoc } from '../lib/useDoc'
 import { emptyHabits, PALETTE, uid, type Habit, type HabitsDoc } from '../lib/types'
 
@@ -33,6 +43,11 @@ function metGoal(habit: Habit, value: number | undefined): boolean {
 function cellColor(habit: Habit, lvl: number): string {
   if (lvl === 0) return 'var(--surface-3)'
   return `color-mix(in srgb, ${habit.color} ${LEVEL_MIX[lvl]}%, var(--surface-3))`
+}
+
+function lastNDates(n: number): string[] {
+  const today = todayISO()
+  return Array.from({ length: n }, (_, i) => addDays(today, -(n - 1 - i)))
 }
 
 function streaks(habit: Habit, log: HabitsDoc['log']) {
@@ -74,6 +89,16 @@ export default function HabitsPage() {
   const [selected, setSelected] = useState(todayISO)
   const [editing, setEditing] = useState<Habit | null>(null)
   const [isNew, setIsNew] = useState(false)
+  const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set())
+
+  function toggleHistory(id: string) {
+    setExpandedHistory((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   const columns = useMemo(() => {
     const firstMonday = addDays(startOfWeek(todayISO()), -(WEEKS - 1) * 7)
@@ -217,6 +242,7 @@ export default function HabitsPage() {
 
             {habits.map((habit) => {
               const stats = streaks(habit, data.log)
+              const expanded = expandedHistory.has(habit.id)
               return (
                 <div key={habit.id} className="card habit-card">
                   <div className="habit-head">
@@ -238,28 +264,31 @@ export default function HabitsPage() {
                     </button>
                   </div>
 
-                  <div className="habit-stats">
-                    <div className="stat">
-                      <div className="value">{stats.current}</div>
-                      <div className="label">Current streak</div>
+                  <div className="habit-hero">
+                    <div className="streak-hero">
+                      <span className="streak-number">{stats.current}</span>
+                      <span className="streak-label">day streak</span>
                     </div>
-                    <div className="stat">
-                      <div className="value">{stats.best}</div>
-                      <div className="label">Best streak</div>
-                    </div>
-                    <div className="stat">
-                      <div className="value">{stats.rate}%</div>
-                      <div className="label">Last 30 days</div>
+                    <div className="faint">
+                      Best {stats.best} · {stats.rate}% last 30 days
                     </div>
                   </div>
 
-                  <Heatmap
-                    habit={habit}
-                    columns={columns}
-                    log={data.log}
-                    selected={selected}
-                    onSelect={setSelected}
-                  />
+                  <WeekStrip habit={habit} log={data.log} selected={selected} onSelect={setSelected} />
+
+                  <button className="btn ghost sm history-toggle" onClick={() => toggleHistory(habit.id)}>
+                    {expanded ? 'Hide full history' : 'Show full history'}
+                  </button>
+
+                  {expanded && (
+                    <Heatmap
+                      habit={habit}
+                      columns={columns}
+                      log={data.log}
+                      selected={selected}
+                      onSelect={setSelected}
+                    />
+                  )}
                 </div>
               )
             })}
@@ -277,6 +306,44 @@ export default function HabitsPage() {
         />
       )}
     </>
+  )
+}
+
+function WeekStrip({
+  habit,
+  log,
+  selected,
+  onSelect,
+}: {
+  habit: Habit
+  log: HabitsDoc['log']
+  selected: string
+  onSelect: (date: string) => void
+}) {
+  const today = todayISO()
+  const dates = lastNDates(7)
+  return (
+    <div className="week-strip">
+      {dates.map((date) => {
+        const value = log[date]?.[habit.id]
+        const label = `${date} · ${value === undefined ? 'no entry' : `${value}${habit.unit}`}`
+        return (
+          <div className="week-strip-col" key={date}>
+            <span className="week-cell-day">{DAY_NAMES[weekdayIndex(date)][0]}</span>
+            <button
+              className={`week-cell${date === today ? ' today' : ''}`}
+              title={label}
+              aria-label={label}
+              style={{
+                background: cellColor(habit, level(habit, value)),
+                outline: date === selected ? `1.5px solid var(--accent)` : undefined,
+              }}
+              onClick={() => onSelect(date)}
+            />
+          </div>
+        )
+      })}
+    </div>
   )
 }
 
