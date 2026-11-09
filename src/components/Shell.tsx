@@ -2,11 +2,11 @@ import { NavLink } from 'react-router-dom'
 import type { ReactNode } from 'react'
 
 export const NAV_ITEMS = [
-  { to: '/blocks', label: 'This week', short: 'Week', glyph: '⏱️' },
-  { to: '/calendar', label: 'Calendar', short: 'Calendar', glyph: '🗓️' },
-  { to: '/habits', label: 'Habits', short: 'Habits', glyph: '🔥' },
-  { to: '/notes', label: 'Notes', short: 'Notes', glyph: '📝' },
-  { to: '/workflow', label: 'Workflow', short: 'Flow', glyph: '🗂️' },
+  { to: '/blocks', label: 'This week', short: 'Week', glyph: '⏱️', primary: true },
+  { to: '/calendar', label: 'Calendar', short: 'Calendar', glyph: '🗓️', primary: true },
+  { to: '/habits', label: 'Habits', short: 'Habits', glyph: '🔥', primary: true },
+  { to: '/notes', label: 'Notes', short: 'Notes', glyph: '📝', primary: false },
+  { to: '/workflow', label: 'Workflow', short: 'Flow', glyph: '🗂️', primary: false },
 ]
 
 export function Shell({
@@ -27,8 +27,17 @@ export function Shell({
           <span className="dot" />
           Planner
         </div>
-        {NAV_ITEMS.map((item) => (
+        {NAV_ITEMS.filter((item) => item.primary).map((item) => (
           <NavLink key={item.to} to={item.to} className="navlink">
+            <span className="glyph" aria-hidden="true">
+              {item.glyph}
+            </span>
+            {item.label}
+          </NavLink>
+        ))}
+        <div className="nav-divider" />
+        {NAV_ITEMS.filter((item) => !item.primary).map((item) => (
+          <NavLink key={item.to} to={item.to} className="navlink secondary">
             <span className="glyph" aria-hidden="true">
               {item.glyph}
             </span>
@@ -55,7 +64,7 @@ export function Shell({
 
       <nav className="tabbar">
         {NAV_ITEMS.map((item) => (
-          <NavLink key={item.to} to={item.to}>
+          <NavLink key={item.to} to={item.to} className={item.primary ? '' : 'secondary'}>
             <span className="glyph" aria-hidden="true">
               {item.glyph}
             </span>

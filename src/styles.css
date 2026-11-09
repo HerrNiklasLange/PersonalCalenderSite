@@ -169,6 +169,12 @@ label.field > span {
 .navlink.active { background: var(--surface-3); color: var(--text); }
 .navlink .glyph { width: 18px; text-align: center; font-size: 1rem; }
 
+.navlink.secondary { font-size: 0.82rem; color: var(--faint); padding: 7px 10px; }
+.navlink.secondary .glyph { font-size: 0.86rem; }
+.navlink.secondary.active { color: var(--muted); }
+
+.nav-divider { height: 1px; background: var(--border); margin: 8px 10px; }
+
 .sidebar-foot { margin-top: auto; display: flex; flex-direction: column; gap: 4px; }
 
 .main { min-width: 0; display: flex; flex-direction: column; }
@@ -200,14 +206,15 @@ label.field > span {
     position: fixed;
     inset: auto 0 0 0;
     z-index: 40;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    display: flex;
+    align-items: stretch;
     padding-bottom: env(safe-area-inset-bottom);
     background: color-mix(in srgb, var(--surface) 94%, transparent);
     backdrop-filter: blur(12px);
     border-top: 1px solid var(--border);
   }
   .tabbar a {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -221,6 +228,10 @@ label.field > span {
   }
   .tabbar a.active { color: var(--accent); }
   .tabbar .glyph { font-size: 1.15rem; }
+
+  .tabbar a.secondary { flex: 0.72; font-size: 0.58rem; opacity: 0.82; }
+  .tabbar a.secondary .glyph { font-size: 0.92rem; }
+  .tabbar a.secondary.active { color: var(--muted); }
 }
 
 /* ---------- primitives ---------- */
