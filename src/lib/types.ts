@@ -83,9 +83,23 @@ export interface TimeBlocksDoc {
   dayEnd: number // last hour shown in the grid
   /** Monday-of-week ISO date -> this week's freeform priorities. */
   focus: Record<string, string>
+  /**
+   * Monday-of-week ISO date -> blockId -> a one-week exception.
+   * `null` skips that recurring block for the week; a `TimeBlock` replaces it
+   * (same id, different time/title/day) or, if the id isn't in `template`,
+   * adds a one-off block that exists only for that week.
+   */
+  overrides: Record<string, Record<string, TimeBlock | null>>
 }
 
-export const emptyTimeBlocks: TimeBlocksDoc = { template: [], log: {}, dayStart: 6, dayEnd: 22, focus: {} }
+export const emptyTimeBlocks: TimeBlocksDoc = {
+  template: [],
+  log: {},
+  dayStart: 6,
+  dayEnd: 22,
+  focus: {},
+  overrides: {},
+}
 
 /* ---------- Notes ---------- */
 

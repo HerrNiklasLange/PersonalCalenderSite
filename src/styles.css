@@ -612,6 +612,11 @@ label.field > span {
 .wg-block .bs { opacity: 0.85; font-size: 0.67rem; white-space: nowrap; }
 .wg-block .mark { position: absolute; top: 2px; right: 4px; font-size: 0.7rem; }
 .wg-block.missed { opacity: 0.45; }
+.wg-exception {
+  position: absolute; top: 4px; left: 4px;
+  width: 6px; height: 6px; border-radius: 99px;
+  background: #fff; box-shadow: 0 0 0 1px rgb(0 0 0 / 0.3);
+}
 .wg-now { position: absolute; left: 0; right: 0; height: 2px; background: var(--danger); z-index: 2; pointer-events: none; }
 .wg-now::before {
   content: ''; position: absolute; left: -3px; top: -3px;

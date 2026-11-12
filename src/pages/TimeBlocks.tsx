@@ -31,9 +31,35 @@ const STATUS_WEIGHT: Record<BlockStatus, number> = { done: 1, partial: 0.5, miss
 const STATUS_MARK: Record<BlockStatus, string> = { done: '✓', partial: '~', missed: '✗' }
 
 type Mode = 'plan' | 'review'
+type Scope = 'series' | 'week'
+
+interface EffectiveBlock extends TimeBlock {
+  /** True when this isn't the recurring plan — a per-week swap or one-off addition. */
+  exception?: boolean
+}
 
 function sortBlocks(a: TimeBlock, b: TimeBlock): number {
   return a.day - b.day || toMinutes(a.start) - toMinutes(b.start)
+}
+
+/** The recurring template with this week's swaps/skips/additions applied. */
+function effectiveBlocks(
+  template: TimeBlock[],
+  overridesForWeek: Record<string, TimeBlock | null> | undefined,
+): EffectiveBlock[] {
+  const result: EffectiveBlock[] = []
+  for (const block of template) {
+    const override = overridesForWeek?.[block.id]
+    if (override === null) continue // skipped this week
+    result.push(override ? { ...override, exception: true } : block)
+  }
+  if (overridesForWeek) {
+    const templateIds = new Set(template.map((b) => b.id))
+    for (const [id, override] of Object.entries(overridesForWeek)) {
+      if (override && !templateIds.has(id)) result.push({ ...override, exception: true })
+    }
+  }
+  return result
 }
 
 export default function TimeBlocksPage() {
@@ -41,7 +67,7 @@ export default function TimeBlocksPage() {
   const [mode, setMode] = useState<Mode>('plan')
   const [weekStart, setWeekStart] = useState(() => startOfWeek(todayISO()))
   const [reviewDay, setReviewDay] = useState(todayISO)
-  const [editing, setEditing] = useState<TimeBlock | null>(null)
+  const [editing, setEditing] = useState<EffectiveBlock | null>(null)
   const [isNew, setIsNew] = useState(false)
 
   const dates = useMemo(() => weekDates(weekStart), [weekStart])
@@ -56,7 +82,11 @@ export default function TimeBlocksPage() {
   const dayStart = data?.dayStart ?? 6
   const dayEnd = data?.dayEnd ?? 22
   const hours = Math.max(1, dayEnd - dayStart)
-  const template = useMemo(() => [...(data?.template ?? [])].sort(sortBlocks), [data])
+  const overridesForWeek = data?.overrides[weekStart]
+  const blocks = useMemo(
+    () => effectiveBlocks(data?.template ?? [], overridesForWeek).sort(sortBlocks),
+    [data, overridesForWeek],
+  )
 
   const adherence = useMemo(() => {
     if (!data) return { pct: 0, planned: 0, kept: 0, reviewed: 0, total: 0 }
@@ -66,10 +96,10 @@ export default function TimeBlocksPage() {
     let reviewed = 0
     let total = 0
     for (const date of dates) {
-      const blocks = template.filter((block) => block.day === weekdayIndex(date))
-      total += blocks.length
+      const dayBlocks = blocks.filter((block) => block.day === weekdayIndex(date))
+      total += dayBlocks.length
       if (date > today) continue
-      for (const block of blocks) {
+      for (const block of dayBlocks) {
         const minutes = toMinutes(block.end) - toMinutes(block.start)
         planned += minutes
         const status = data.log[date]?.[block.id]?.status
@@ -80,26 +110,47 @@ export default function TimeBlocksPage() {
       }
     }
     return { pct: planned ? Math.round((kept / planned) * 100) : 0, planned, kept, reviewed, total }
-  }, [data, dates, template])
+  }, [data, dates, blocks])
 
-  function saveBlock(block: TimeBlock) {
+  function saveBlock(block: TimeBlock, scope: Scope) {
     if (toMinutes(block.end) <= toMinutes(block.start)) return
-    const clean = { ...block, title: block.title.trim() || 'Untitled block' }
-    update((doc) => ({
-      ...doc,
-      template: isNew ? [...doc.template, clean] : doc.template.map((b) => (b.id === clean.id ? clean : b)),
-    }))
+    const clean: TimeBlock = {
+      id: block.id,
+      day: block.day,
+      start: block.start,
+      end: block.end,
+      title: block.title.trim() || 'Untitled block',
+      color: block.color,
+    }
+    update((doc) => {
+      if (scope === 'series') {
+        const template = isNew ? [...doc.template, clean] : doc.template.map((b) => (b.id === clean.id ? clean : b))
+        // An edit to the recurring plan should win over a stale one-week swap for it.
+        const weekOverrides = { ...(doc.overrides[weekStart] ?? {}) }
+        delete weekOverrides[clean.id]
+        return { ...doc, template, overrides: { ...doc.overrides, [weekStart]: weekOverrides } }
+      }
+      const weekOverrides = { ...(doc.overrides[weekStart] ?? {}), [clean.id]: clean }
+      return { ...doc, overrides: { ...doc.overrides, [weekStart]: weekOverrides } }
+    })
     setEditing(null)
   }
 
-  function deleteBlock(id: string) {
+  function deleteBlock(id: string, scope: Scope) {
     update((doc) => {
-      const log: TimeBlocksDoc['log'] = {}
-      for (const [date, entries] of Object.entries(doc.log)) {
-        const { [id]: _removed, ...rest } = entries
-        if (Object.keys(rest).length) log[date] = rest
+      if (scope === 'series') {
+        const log: TimeBlocksDoc['log'] = {}
+        for (const [date, entries] of Object.entries(doc.log)) {
+          const { [id]: _removed, ...rest } = entries
+          if (Object.keys(rest).length) log[date] = rest
+        }
+        return { ...doc, template: doc.template.filter((b) => b.id !== id), log }
       }
-      return { ...doc, template: doc.template.filter((b) => b.id !== id), log }
+      const isTemplateBlock = doc.template.some((b) => b.id === id)
+      const weekOverrides = { ...(doc.overrides[weekStart] ?? {}) }
+      if (isTemplateBlock) weekOverrides[id] = null
+      else delete weekOverrides[id]
+      return { ...doc, overrides: { ...doc.overrides, [weekStart]: weekOverrides } }
     })
     setEditing(null)
   }
@@ -129,7 +180,7 @@ export default function TimeBlocksPage() {
     setIsNew(true)
   }
 
-  const reviewBlocks = template.filter((block) => block.day === weekdayIndex(reviewDay))
+  const reviewBlocks = blocks.filter((block) => block.day === weekdayIndex(reviewDay))
 
   return (
     <>
@@ -138,7 +189,7 @@ export default function TimeBlocksPage() {
         <button
           className="btn"
           onClick={() =>
-            data && exportWeekPNG(template, dayStart, dayEnd, `Weekly timetable · week of ${formatShort(weekStart)}`)
+            data && exportWeekPNG(blocks, dayStart, dayEnd, `Weekly timetable · week of ${formatShort(weekStart)}`)
           }
         >
           PNG
@@ -242,7 +293,7 @@ export default function TimeBlocksPage() {
 
                     {dates[day] === todayISO() && <NowLine dayStart={dayStart} dayEnd={dayEnd} />}
 
-                    {template
+                    {blocks
                       .filter((block) => block.day === day)
                       .map((block) => {
                         const start = toMinutes(block.start)
@@ -265,6 +316,9 @@ export default function TimeBlocksPage() {
                               setIsNew(false)
                             }}
                           >
+                            {block.exception && (
+                              <span className="wg-exception" title="Different this week" aria-label="Different this week" />
+                            )}
                             {status && <span className="mark">{STATUS_MARK[status]}</span>}
                             <span className="bt">{block.title}</span>
                             {height > 32 && (
@@ -364,9 +418,10 @@ export default function TimeBlocksPage() {
         <BlockModal
           block={editing}
           isNew={isNew}
+          weekLabel={`${formatShort(weekStart)} – ${formatShort(addDays(weekStart, 6))}`}
           onClose={() => setEditing(null)}
           onSave={saveBlock}
-          onDelete={() => deleteBlock(editing.id)}
+          onDelete={(scope) => deleteBlock(editing.id, scope)}
         />
       )}
     </>
@@ -390,17 +445,20 @@ function NowLine({ dayStart, dayEnd }: { dayStart: number; dayEnd: number }) {
 function BlockModal({
   block,
   isNew,
+  weekLabel,
   onClose,
   onSave,
   onDelete,
 }: {
-  block: TimeBlock
+  block: EffectiveBlock
   isNew: boolean
+  weekLabel: string
   onClose: () => void
-  onSave: (block: TimeBlock) => void
-  onDelete: () => void
+  onSave: (block: TimeBlock, scope: Scope) => void
+  onDelete: (scope: Scope) => void
 }) {
-  const [draft, setDraft] = useState(block)
+  const [draft, setDraft] = useState<TimeBlock>(block)
+  const [scope, setScope] = useState<Scope>(block.exception ? 'week' : 'series')
   const invalid = toMinutes(draft.end) <= toMinutes(draft.start)
 
   return (
@@ -410,19 +468,30 @@ function BlockModal({
       footer={
         <>
           {!isNew && (
-            <button className="btn danger left" onClick={onDelete}>
-              Delete
+            <button className="btn danger left" onClick={() => onDelete(scope)}>
+              {scope === 'series' ? 'Remove from every week' : 'Skip just this week'}
             </button>
           )}
           <button className="btn" onClick={onClose}>
             Cancel
           </button>
-          <button className="btn primary" disabled={invalid} onClick={() => onSave(draft)}>
+          <button className="btn primary" disabled={invalid} onClick={() => onSave(draft, scope)}>
             Save
           </button>
         </>
       }
     >
+      <Field label="Applies to">
+        <Segmented<Scope>
+          value={scope}
+          onChange={setScope}
+          options={[
+            { value: 'series', label: 'Every week' },
+            { value: 'week', label: `Just ${weekLabel}` },
+          ]}
+        />
+      </Field>
+
       <Field label="Title">
         <input
           type="text"
@@ -459,7 +528,10 @@ function BlockModal({
       </Field>
 
       <p className="faint" style={{ margin: 0 }}>
-        Blocks repeat every week. Use <strong>Review</strong> to record whether you actually followed them.
+        {scope === 'series'
+          ? 'Changes the recurring weekly plan, from this week on.'
+          : "Only changes this one week — next week reverts to the recurring plan."}{' '}
+        Use <strong>Review</strong> to record whether you actually followed it.
       </p>
     </Modal>
   )
