@@ -8,6 +8,7 @@ import HabitsPage from './pages/Habits'
 import TimeBlocksPage from './pages/TimeBlocks'
 import NotesPage from './pages/Notes'
 import WorkflowPage from './pages/Workflow'
+import LifePage from './pages/Life'
 
 type Theme = 'light' | 'dark'
 
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="/blocks" element={<TimeBlocksPage />} />
         <Route path="/notes" element={<NotesPage />} />
         <Route path="/workflow" element={<WorkflowPage />} />
+        <Route path="/life" element={<LifePage />} />
         <Route path="*" element={<Navigate to="/blocks" replace />} />
       </Routes>
     </Shell>

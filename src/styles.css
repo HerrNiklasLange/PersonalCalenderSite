@@ -534,6 +534,13 @@ label.field > span {
 .focus-card { display: flex; flex-direction: column; gap: 8px; }
 .focus-input { min-height: 64px; }
 
+/* ---------- life ---------- */
+
+.life-grid { display: grid; gap: 2px; }
+.life-cell { aspect-ratio: 1; border-radius: 2px; background: var(--surface-3); }
+.life-cell.passed { background: var(--accent); opacity: 0.55; }
+.life-cell.current { background: var(--accent); box-shadow: 0 0 0 1.5px var(--text); }
+
 .week-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .week-grid {
   display: grid;

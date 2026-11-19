@@ -1,4 +1,4 @@
-export type Collection = 'calendar' | 'habits' | 'timeblocks' | 'notes' | 'workflow'
+export type Collection = 'calendar' | 'habits' | 'timeblocks' | 'notes' | 'workflow' | 'life'
 
 export const PALETTE = [
   '#6366f1', '#0ea5e9', '#10b981', '#f59e0b',
@@ -171,6 +171,15 @@ export const BOARDS: { id: BoardId; label: string }[] = [
   { id: 'personal', label: 'Personal' },
   { id: 'career', label: 'Career' },
 ]
+
+/* ---------- Life ---------- */
+
+export interface LifeDoc {
+  /** YYYY-MM-DD, empty until the user sets it. */
+  birthDate: string
+}
+
+export const emptyLife: LifeDoc = { birthDate: '' }
 
 /* ---------- helpers ---------- */
 

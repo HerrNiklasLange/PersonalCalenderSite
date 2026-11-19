@@ -1,7 +1,7 @@
 import { getStore } from '@netlify/blobs'
 
 /** The documents the client is allowed to read and write. */
-export const COLLECTIONS = ['calendar', 'habits', 'timeblocks', 'notes', 'workflow'] as const
+export const COLLECTIONS = ['calendar', 'habits', 'timeblocks', 'notes', 'workflow', 'life'] as const
 export type Collection = (typeof COLLECTIONS)[number]
 
 export function isCollection(value: string): value is Collection {

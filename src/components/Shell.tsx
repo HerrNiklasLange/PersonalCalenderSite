@@ -7,6 +7,7 @@ export const NAV_ITEMS = [
   { to: '/habits', label: 'Habits', short: 'Habits', glyph: '🔥', primary: true },
   { to: '/notes', label: 'Notes', short: 'Notes', glyph: '📝', primary: false },
   { to: '/workflow', label: 'Workflow', short: 'Flow', glyph: '🗂️', primary: false },
+  { to: '/life', label: 'Life', short: 'Life', glyph: '⏳', primary: false },
 ]
 
 export function Shell({
