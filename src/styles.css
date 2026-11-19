@@ -540,6 +540,25 @@ label.field > span {
 .life-cell { aspect-ratio: 1; border-radius: 2px; background: var(--surface-3); }
 .life-cell.passed { background: var(--accent); opacity: 0.55; }
 .life-cell.current { background: var(--accent); box-shadow: 0 0 0 1.5px var(--text); }
+.life-cell.avg { box-shadow: 0 0 0 1.5px var(--danger); }
+
+.life-legend { gap: 14px; font-size: 0.72rem; }
+.life-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--surface-3); }
+.legend-dot.passed { background: var(--accent); opacity: 0.55; }
+.legend-dot.current { background: var(--accent); box-shadow: 0 0 0 1.5px var(--text); }
+.legend-dot.avg { box-shadow: 0 0 0 1.5px var(--danger); }
+
+.milestone-highlight { font-size: 0.95rem; font-weight: 600; }
+.milestone-list { display: flex; flex-direction: column; gap: 5px; }
+.milestone-row { display: flex; gap: 10px; align-items: baseline; font-size: 0.82rem; color: var(--muted); }
+.milestone-row .milestone-age {
+  width: 26px; flex: none;
+  font-weight: 700; font-variant-numeric: tabular-nums;
+  color: var(--faint);
+}
+.milestone-row.current { color: var(--text); }
+.milestone-row.current .milestone-age { color: var(--accent); }
 
 .week-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .week-grid {
