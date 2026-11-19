@@ -549,17 +549,6 @@ label.field > span {
 .legend-dot.current { background: var(--accent); box-shadow: 0 0 0 1.5px var(--text); }
 .legend-dot.avg { box-shadow: 0 0 0 1.5px var(--danger); }
 
-.milestone-highlight { font-size: 0.95rem; font-weight: 600; }
-.milestone-list { display: flex; flex-direction: column; gap: 5px; }
-.milestone-row { display: flex; gap: 10px; align-items: baseline; font-size: 0.82rem; color: var(--muted); }
-.milestone-row .milestone-age {
-  width: 26px; flex: none;
-  font-weight: 700; font-variant-numeric: tabular-nums;
-  color: var(--faint);
-}
-.milestone-row.current { color: var(--text); }
-.milestone-row.current .milestone-age { color: var(--accent); }
-
 .week-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .week-grid {
   display: grid;

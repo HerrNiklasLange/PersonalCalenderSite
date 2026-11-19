@@ -19,19 +19,6 @@ const LIFE_EXPECTANCY = [
   { label: 'UK', years: 79.0 },
 ]
 
-// A few examples of what was achieved at a given age — not a schedule, just proof it happens at every age.
-const MILESTONES = [
-  { age: 20, text: 'Alexander the Great became King of Macedon.' },
-  { age: 23, text: "Isaac Newton laid the groundwork for calculus in his 'year of wonders'." },
-  { age: 26, text: "Einstein published four papers that reshaped physics — his 'miracle year'." },
-  { age: 32, text: 'Oprah Winfrey launched her nationally syndicated talk show.' },
-  { age: 40, text: 'Vera Wang entered the fashion industry and built her bridal label.' },
-  { age: 45, text: 'Samuel L. Jackson landed his breakout role in Pulp Fiction.' },
-  { age: 49, text: 'Julia Child published Mastering the Art of French Cooking.' },
-  { age: 62, text: 'Colonel Harland Sanders started franchising KFC.' },
-  { age: 78, text: 'Grandma Moses began her painting career.' },
-]
-
 function parseLocalDate(iso: string): Date {
   const [y, m, d] = iso.split('-').map(Number)
   return new Date(y, m - 1, d)
@@ -116,11 +103,6 @@ export default function LifePage() {
     const date = addFractionalYears(birth, avgYears)
     return Math.min(grid.total - 1, Math.max(0, unitsBetween(granularity, birth, date)))
   }, [birth, grid, granularity])
-
-  const nextMilestone = useMemo(() => {
-    const ageYears = lived?.years ?? 0
-    return MILESTONES.find((m) => m.age >= ageYears) ?? MILESTONES[MILESTONES.length - 1]
-  }, [lived])
 
   function startEdit() {
     setDraftBirth(data?.birthDate ?? '')
@@ -229,25 +211,6 @@ export default function LifePage() {
                   </div>
                 </div>
               )}
-
-              <div className="card stack">
-                <div className="faint">
-                  {lived.years < nextMilestone.age
-                    ? `In ${nextMilestone.age - lived.years} year${nextMilestone.age - lived.years === 1 ? '' : 's'}, you'll be the age when:`
-                    : lived.years === nextMilestone.age
-                      ? "You're that age right now:"
-                      : "You've outlived every example below — time to set the next one:"}
-                </div>
-                <div className="milestone-highlight">{nextMilestone.text}</div>
-                <div className="milestone-list">
-                  {MILESTONES.map((m) => (
-                    <div key={m.age} className={`milestone-row${m.age === nextMilestone.age ? ' current' : ''}`}>
-                      <span className="milestone-age">{m.age}</span>
-                      <span>{m.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
               <div className="card stack">
                 <div className="spread">
